@@ -1,15 +1,15 @@
 import numpy as np
 
-def bridge(var, steps, seed=None):
+def bridge(var, steps, state=np.random.get_state()):
     """1D Brownian bridge in the time interval [0,1]
     # Arguments
         var: variance of the Brownian bridge
         steps: number of time steps to simulate
-        seed: seed for the randomness
+        state: state of random number generator
     # Result
         trace of the bridge
     """
-    np.random.seed(seed)
+    np.random.set_state(state)
 
     incs = np.random.randn(steps)
     incs = np.insert(incs, 0, 0)

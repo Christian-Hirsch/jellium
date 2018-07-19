@@ -1,7 +1,7 @@
 import numpy as np
 from jellium.energy import energy
 
-def mcmc(pair_pot, n_iter, init_val, propose, seed=None):
+def mcmc(pair_pot, n_iter, init_val, propose, state=np.random.get_state()):
     """MCMC for MH
     
     Simulates Markov chain converging to the posterior
@@ -10,11 +10,11 @@ def mcmc(pair_pot, n_iter, init_val, propose, seed=None):
         n_iter: number of iterations
         init_val: initial value of Markov chain
         propose: proposal function for a single parameter
-        seed:seed for randomness
+        state: state of random number generator
     # Result
         energy of the configuration under the pair potential
     """
-    np.random.seed(seed)
+    np.random.set_state(state)
 
     n_pts = init_val.shape[0]
     trace = np.zeros((n_iter ,)+ init_val.shape)

@@ -26,7 +26,7 @@ def test_mcmc():
     window = 50
 
 
-    trace = mcmc(pair_pot, n_iter, init_val, propose, seed)
+    trace = mcmc(pair_pot, n_iter, init_val, propose, np.random.get_state())
 
     #correct shape
     assert trace.shape == (n_iter,) + init_val.shape
