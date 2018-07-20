@@ -81,3 +81,52 @@ def test_mcmc_dyn():
     #energy must decrease
     energy_trace = [energy(conf, pair_pot) for conf in trace]
     assert np.mean(energy_trace[:window]) - np.mean(energy_trace[-window:]) >  np.std(energy_trace[-window:]) * decrease_factor
+    
+def test_mcmc_dyn_dim2():
+    seed = 42
+    np.random.seed(seed)
+    state = np.random.get_state()
+
+    EPS = 1e-2
+    size = int(2e1)
+    size_2 = 2
+    size_all = np.array([size, size_2])
+    beta = 2
+    steps = 20
+    pair_pot = lambda x: - beta/(steps + 1) * d_tor(x, size=size_all)
+    n_iter = int(2e3)
+
+    var = 1
+
+    states = [state for state,_ in [[np.random.get_state(), np.random.rand()] for _ in range(int(size/2))]]
+    init_start_pts = np.array([np.random.rand(int(size/2)) * scale 
+                               for scale in size_all])[np.newaxis] 
+    init_start_pts = np.repeat(init_start_pts, steps + 1, 0).transpose()
+    init_bridges = np.array([[bridge(var, steps) for _ in range(2)] for _ in range(len(states))])
+    init_val =  init_start_pts + init_bridges
+
+    rep_size = lambda x: np.moveaxis(np.repeat(size_all[np.newaxis],
+                                               np.product(list(x.shape))/2, 0).reshape(x.shape[0], x.shape[2],-1), 2, 1)
+    torify = lambda x: x - rep_size(x) * np.floor( (x/rep_size(x)+.5))
+    propose =  lambda x: torify(np.moveaxis(np.repeat(x[:,:,0][np.newaxis], steps + 1, 0), 0, 2)
+                                + np.repeat(np.random.randn(2,x.shape[0])[np.newaxis], steps + 1, 0).transpose()
+                                + np.array([[bridge(var, steps) for _ in range(2)] for _ in range(x.shape[0])]))
+
+    #energy decrease factor
+    decrease_factor = 2
+
+    #size of rolling window for moving averages
+    window = 50
+
+
+    trace = mcmc(pair_pot, n_iter, init_val, propose, state)
+
+    #correct shape
+    assert trace.shape == (n_iter,) + init_val.shape
+
+    #values should change
+    assert_array_less(EPS, trace.var(axis = 0))
+
+    #energy must decrease
+    energy_trace = [energy(conf, pair_pot) for conf in trace]
+    assert np.mean(energy_trace[:window]) - np.mean(energy_trace[-window:]) >  np.std(energy_trace[-window:]) * decrease_factor
