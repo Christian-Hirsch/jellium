@@ -14,3 +14,8 @@ def test_energy():
 
     assert energy(conf, lambda x: -d_tor(x, size)) != 0
     assert energy(conf, lambda x: -d_tor(x, size)) == pytest.approx(-size**3/4, rel=EPS)
+    
+    steps = 5
+    conf_dyn = np.random.rand(size,steps) * size - size/2
+    assert energy(conf_dyn, lambda x: -d_tor(x, size)) != 0
+    assert energy(conf_dyn, lambda x: -d_tor(x, size)) == pytest.approx(-steps * size**3/4, rel=EPS)

@@ -1,6 +1,6 @@
 import numpy as np
 
-def bridge(var, steps, state=np.random.get_state()):
+def bridge(var, steps, state=None):
     """1D Brownian bridge in the time interval [0,1]
     # Arguments
         var: variance of the Brownian bridge
@@ -9,6 +9,7 @@ def bridge(var, steps, state=np.random.get_state()):
     # Result
         trace of the bridge
     """
+    if state==None: state = np.random.get_state()
     np.random.set_state(state)
 
     incs = np.random.randn(steps)
