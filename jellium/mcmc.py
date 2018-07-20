@@ -1,5 +1,5 @@
 import numpy as np
-from jellium.energy import energy
+from .energy import energy
 
 def mcmc(pair_pot, n_iter, init_val, propose, state=None):
     """MCMC for MH

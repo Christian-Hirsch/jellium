@@ -13,3 +13,32 @@ def d_tor(x, size):
     size_rep = np.repeat(size[np.newaxis], x.shape[1], 0).transpose()
     dist = np.min(np.abs([x, x - size_rep, x + size_rep]),0)
     return np.hypot(*dist)
+
+def unwrap_edge(edge, size):
+    """Unwraps a single edge on the torus
+    # Arguments
+        path: path on the torus
+        size: array describing the size of the torus
+    # Result
+        two edges that not wrapping around the torus
+    """
+    shifts = np.matmul(np.diag(size),np.array([[0, 1, -1], [0, 1, -1]]))
+    rep_diff = np.repeat((edge[0]-edge[1])[np.newaxis], 3, 0).transpose() 
+    rep_siz = np.repeat(size[np.newaxis], 3, 0).transpose()
+    shift = shifts[np.abs(rep_diff +  shifts) < 0.5 * rep_siz]
+
+    p0_new, p1_new = edge[0] + shift.transpose(), edge[1] - shift.transpose()
+    return [edge[0], p1_new], [p0_new, edge[1]]
+
+def unwrap_path(path, size):
+    """Unwraps a path on the torus
+    # Arguments
+        path: path on the torus
+        size: array describing the size of the torus
+    # Result
+        list of sub-paths such that non of the sub-paths wraps around the torus
+    """
+    return  [edge 
+             for i in range(path.shape[1])
+             for edge in  unwrap_edge(np.array([path[:,i], path[:,((i+1) % path.shape[1])]]), size)              
+            ]

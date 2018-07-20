@@ -54,14 +54,13 @@ def test_mcmc_dyn():
     var = 1
 
     states = [state for state,_ in [[np.random.get_state(), np.random.rand()] for _ in range(int(size/2))]]
-    init_start_pts = np.repeat(np.random.rand(int(size/2))[np.newaxis] * size, steps + 1, 0).transpose()
+    init_start_pts = np.repeat((np.random.rand(int(size/2))-.5)[np.newaxis] * size, steps + 1, 0).transpose()
     init_bridges = np.array([bridge(var, steps, state) for state in states])
     init_val =  init_start_pts + init_bridges
 
     torify = lambda x: x - size * np.floor( (x/size+.5))
-    propose =  lambda x: torify(np.repeat(x[:,0][np.newaxis], steps + 1, 0).transpose()
-                                + np.repeat(np.random.randn(x.shape[0])[np.newaxis], steps + 1, 0).transpose()
-                                + np.array([bridge(var, steps) for _ in range(x.shape[0])]))
+    propose =  lambda x: torify(np.repeat((x[:,0]+np.random.randn(x.shape[0]))[np.newaxis], steps + 1, 0).transpose()
+                            +np.array([bridge(var, steps) for _ in range(x.shape[0])]))
 
     #energy decrease factor
     decrease_factor = 2
@@ -88,18 +87,17 @@ def test_mcmc_dyn_dim2():
     state = np.random.get_state()
 
     EPS = 1e-2
-    size = int(2e1)
-    size_2 = 2
-    size_all = np.array([size, size_2])
+    size_all = np.array([int(2e1), 2])
+    n_part = int(size_all[0]/2)
     beta = 2
-    steps = 20
+    steps = 10
     pair_pot = lambda x: - beta/(steps + 1) * d_tor(x, size=size_all)
     n_iter = int(2e3)
 
     var = 1
 
-    states = [state for state,_ in [[np.random.get_state(), np.random.rand()] for _ in range(int(size/2))]]
-    init_start_pts = np.array([np.random.rand(int(size/2)) * scale 
+    states = [state for state,_ in [[np.random.get_state(), np.random.rand()] for _ in range(n_part)]]
+    init_start_pts = np.array([np.random.rand(n_part) * scale 
                                for scale in size_all])[np.newaxis] 
     init_start_pts = np.repeat(init_start_pts, steps + 1, 0).transpose()
     init_bridges = np.array([[bridge(var, steps) for _ in range(2)] for _ in range(len(states))])
@@ -108,8 +106,7 @@ def test_mcmc_dyn_dim2():
     rep_size = lambda x: np.moveaxis(np.repeat(size_all[np.newaxis],
                                                np.product(list(x.shape))/2, 0).reshape(x.shape[0], x.shape[2],-1), 2, 1)
     torify = lambda x: x - rep_size(x) * np.floor( (x/rep_size(x)+.5))
-    propose =  lambda x: torify(np.moveaxis(np.repeat(x[:,:,0][np.newaxis], steps + 1, 0), 0, 2)
-                                + np.repeat(np.random.randn(2,x.shape[0])[np.newaxis], steps + 1, 0).transpose()
+    propose =  lambda x: torify(np.moveaxis(np.repeat((x[:,:,0]+np.random.randn(2))[np.newaxis], steps + 1, 0), 0, 2)
                                 + np.array([[bridge(var, steps) for _ in range(2)] for _ in range(x.shape[0])]))
 
     #energy decrease factor
