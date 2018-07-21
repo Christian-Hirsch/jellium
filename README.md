@@ -5,9 +5,11 @@ This package provides Python scripts for simulation and visualization related to
 <img src="jellium.png" /></a>
 </p>
 
-[Coulomb systems](https://arxiv.org/abs/1712.04095) are interacting particle systems <img src="http://latex.codecogs.com/gif.latex?$\{x_1, \ldots, x_N\}$" /> with potential energy
+[Coulomb systems](https://arxiv.org/abs/1712.04095) are interacting particle systems <img src="http://latex.codecogs.com/gif.latex?$\{x_1,\ldots,x_N\}$" /> with potential energy
 
-<img src="http://latex.codecogs.com/gif.latex?$$\sum_{i < j} g(x_i - x_j), $$" />
+<p align="center">
+<img src="http://latex.codecogs.com/gif.latex?$$\sum_{i<j}g(x_i-x_j),$$" />
+</p>
 
 where $g$ denotes the [Green's function](https://en.wikipedia.org/wiki/Green%27s_function) in the considered domain.
 
