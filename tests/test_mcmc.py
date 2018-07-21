@@ -4,7 +4,7 @@ from jellium.energy import energy
 from numpy.testing import assert_array_less 
 from jellium.mcmc import mcmc
 from jellium.bridge import bridge
-from jellium.utils import d_tor
+from jellium.utils import d_tor, torify
 
 def test_mcmc():
     seed = 42
@@ -87,27 +87,23 @@ def test_mcmc_dyn_dim2():
     state = np.random.get_state()
 
     EPS = 1e-2
-    size_all = np.array([int(2e1), 2])
-    n_part = int(size_all[0]/2)
+    size = np.array([int(2e1), 2])
+    n_part = int(size[0]/2)
     beta = 2
-    steps = 10
-    pair_pot = lambda x: - beta/(steps + 1) * d_tor(x, size=size_all)
+    steps = 20
+    pair_pot = lambda x: - beta/(steps + 1) * d_tor(x, size=size)
     n_iter = int(2e3)
 
     var = 1
 
     states = [state for state,_ in [[np.random.get_state(), np.random.rand()] for _ in range(n_part)]]
-    init_start_pts = np.array([np.random.rand(n_part) * scale 
-                               for scale in size_all])[np.newaxis] 
-    init_start_pts = np.repeat(init_start_pts, steps + 1, 0).transpose()
-    init_bridges = np.array([[bridge(var, steps) for _ in range(2)] for _ in range(len(states))])
+    init_start_pts = np.expand_dims(((np.random.rand(n_part, 2) - .5) * size), -1)
+    init_start_pts = np.repeat(init_start_pts, steps + 1, -1)
+    init_bridges = np.array([[bridge(var, steps) for _ in range(2)] for _ in range(n_part)])
     init_val =  init_start_pts + init_bridges
 
-    rep_size = lambda x: np.moveaxis(np.repeat(size_all[np.newaxis],
-                                               np.product(list(x.shape))/2, 0).reshape(x.shape[0], x.shape[2],-1), 2, 1)
-    torify = lambda x: x - rep_size(x) * np.floor( (x/rep_size(x)+.5))
-    propose =  lambda x: torify(np.moveaxis(np.repeat((x[:,:,0]+np.random.randn(2))[np.newaxis], steps + 1, 0), 0, 2)
-                                + np.array([[bridge(var, steps) for _ in range(2)] for _ in range(x.shape[0])]))
+    propose =  lambda x: torify(np.repeat(np.expand_dims(x[:,:,0] + np.random.randn(*(x[:,:,0].shape)), -1), steps + 1, -1)
+                                + np.array([[bridge(var, steps) for _ in range(2)] for _ in range(x.shape[0])]), size)
 
     #energy decrease factor
     decrease_factor = 2

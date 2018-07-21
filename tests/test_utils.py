@@ -1,14 +1,12 @@
 import pytest
 import numpy as np
-from jellium.utils import d_tor, unwrap_edge, unwrap_path
+from jellium.utils import d_tor, torify, green_strip, unwrap_edge, unwrap_path
 from numpy.testing import assert_array_equal, assert_array_less
-
 
 def test_d_tor():
     x = -6
     size = 10
-    
-    
+
     dist = d_tor(x, size)
     
     assert 4 == pytest.approx(dist)
@@ -27,6 +25,42 @@ def test_d_tor():
     conf2 = np.random.rand(size) * size_small - size_small/2
     
     assert len(d_tor(np.array([conf, conf2]), np.array([size, size_small]))) == size
+    
+    
+def test_green_strip():
+    x = np.array([[3,3],[4,4]])
+    size = np.array([10, 10])
+    
+    dist = green_strip(x, size)
+    
+    assert 5 == pytest.approx(-dist[0])
+    
+    #test vectorization
+    seed = 42
+    size = int(1e2)
+
+    np.random.seed(seed)
+
+    conf = np.random.rand(size) * size - size/2
+    
+    assert len(green_strip(conf, size)) == size
+    
+    size_small = 1
+    conf2 = np.random.rand(size) * size_small - size_small/2
+    
+    assert len(green_strip(np.array([conf, conf2]), np.array([size, size_small]))) == size
+    
+def test_torify():
+    seed = 42
+    np.random.seed(seed)
+
+    size = np.array([20, 2])
+    x = np.expand_dims(((np.random.rand(10, 2) - .5) *   size), -1)
+    x = np.repeat(x, 200 + 1, -1)
+
+    x_tor = torify(x, size=size)
+
+    assert_array_less(np.max(np.abs(x_tor), (0,2)), size/2)
     
 def test_unwrap_edge():
     edge = np.array([[ 9.83,  0.9 ], [ 9.81, -0.98]])
