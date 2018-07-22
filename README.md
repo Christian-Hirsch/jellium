@@ -2,7 +2,7 @@
 This package provides Python scripts for simulation and visualization related to Maxwell-Boltzmann statistics for Coulomb gases
 
 <p align="center">
-<img src="jellium.png" /></a>
+<img src="jellium.gif" /></a>
 </p>
 
 [Coulomb systems](https://arxiv.org/abs/1712.04095) are interacting particle systems <img src="http://latex.codecogs.com/gif.latex?$\{x_1,\ldots,x_N\}$" /> with potential energy
